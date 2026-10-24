@@ -98,7 +98,20 @@ Priority: **High** = fix first, **Medium** = good to have.
 - **Recent conversions** and **favourites**.
 - **More languages**.
 
-## 7. How we check
+## 7. Result
+
+All the changes in part 5 are done. The phone after the changes:
+the categories are one row, the ± button is there, and the answer is on the first screen.
+
+<p>
+  <img src="ui-ux/before-phone.png" alt="Before" width="300">
+  <img src="screenshots/phone.png" alt="After" width="300">
+</p>
+
+The colour check found one problem: the borders of the boxes and buttons were too light (about 1.3 : 1).
+Now they use a new, darker colour (`--control-border`), with at least 3 : 1 in light and dark mode.
+
+## 8. How we check
 
 1. **Tests:** `pytest` must pass. This includes new tests for the formula and the popular pairs.
 2. **Browser test:** a small script clicks every new button in a real browser (Edge) and checks the result.

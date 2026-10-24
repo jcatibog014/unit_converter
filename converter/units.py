@@ -26,6 +26,7 @@ class Category(NamedTuple):
     default_from: str
     default_to: str
     allow_negative: bool  # can a value below zero make sense?
+    popular: tuple[tuple[str, str], ...] = ()  # quick-pick (from, to) pairs
 
 
 CATEGORIES = {
@@ -45,6 +46,7 @@ CATEGORIES = {
         default_from="metre",
         default_to="foot",
         allow_negative=False,
+        popular=(("centimetre", "inch"), ("metre", "foot"), ("kilometre", "mile"), ("mile", "kilometre")),
     ),
     "weight": Category(
         label="Weight",
@@ -60,6 +62,7 @@ CATEGORIES = {
         default_from="kilogram",
         default_to="pound",
         allow_negative=False,
+        popular=(("kilogram", "pound"), ("pound", "kilogram"), ("gram", "ounce"), ("kilogram", "gram")),
     ),
     "temperature": Category(
         label="Temperature",
@@ -71,6 +74,7 @@ CATEGORIES = {
         default_from="celsius",
         default_to="fahrenheit",
         allow_negative=True,  # but not below absolute zero, see ABSOLUTE_ZERO
+        popular=(("celsius", "fahrenheit"), ("fahrenheit", "celsius"), ("celsius", "kelvin")),
     ),
     "area": Category(
         label="Area",
@@ -89,6 +93,7 @@ CATEGORIES = {
         default_from="square_metre",
         default_to="square_foot",
         allow_negative=False,
+        popular=(("square_metre", "square_foot"), ("hectare", "acre"), ("square_kilometre", "square_mile")),
     ),
     "volume": Category(
         label="Volume",
@@ -108,6 +113,7 @@ CATEGORIES = {
         default_from="litre",
         default_to="gallon",
         allow_negative=False,
+        popular=(("litre", "gallon"), ("gallon", "litre"), ("cup", "millilitre"), ("tablespoon", "millilitre")),
     ),
     "speed": Category(
         label="Speed",
@@ -121,6 +127,7 @@ CATEGORIES = {
         default_from="kilometre_per_hour",
         default_to="mile_per_hour",
         allow_negative=False,
+        popular=(("kilometre_per_hour", "mile_per_hour"), ("mile_per_hour", "kilometre_per_hour"), ("knot", "kilometre_per_hour")),
     ),
     "time": Category(
         label="Time",
@@ -136,6 +143,7 @@ CATEGORIES = {
         default_from="hour",
         default_to="minute",
         allow_negative=False,
+        popular=(("hour", "minute"), ("day", "hour"), ("minute", "second"), ("year", "day")),
     ),
     "data": Category(
         label="Digital storage",
@@ -154,6 +162,7 @@ CATEGORIES = {
         default_from="gigabyte",
         default_to="megabyte",
         allow_negative=False,
+        popular=(("gigabyte", "megabyte"), ("terabyte", "gigabyte"), ("gibibyte", "gigabyte"), ("byte", "bit")),
     ),
 }
 

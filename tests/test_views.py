@@ -1,4 +1,6 @@
 """Tests for the web pages, through Flask's test client (no real browser)."""
+import re
+
 import pytest
 
 
@@ -66,6 +68,7 @@ def test_api_converts(client):
         "symbol": "g",
         "input": "1 kg",
         "summary": "1 kg = 1,000 g",
+        "formula": "Multiply by 1,000",
     }
 
 
@@ -97,3 +100,46 @@ def test_unknown_page_gives_404(client):
     response = client.get("/nothing-here")
     assert response.status_code == 404
     assert "We couldn&#39;t find that page." in response.get_data(as_text=True)
+
+
+def test_page_shows_the_formula(client):
+    html = client.get("/?category=temperature&value=100&from=celsius&to=fahrenheit").get_data(as_text=True)
+    assert "°F = °C × 9/5 + 32" in html
+
+
+def test_popular_chips_link_to_their_pair(client):
+    html = client.get("/?category=weight&value=2&from=kilogram&to=gram").get_data(as_text=True)
+    assert "kg → lb" in html
+    assert "category=weight&amp;value=2&amp;from=kilogram&amp;to=pound" in html
+    # The chip for the pair on screen (kg → g) is marked as the current one.
+    assert re.search(r'data-from="kilogram" data-to="gram"\s+aria-current="true"', html)
+    assert not re.search(r'data-to="pound"\s+aria-current', html)
+
+
+def test_every_tab_has_an_icon(client):
+    html = client.get("/").get_data(as_text=True)
+    assert html.count('<svg class="icon"') == 8
+
+
+def test_error_is_in_the_spoken_summary(client):
+    html = client.get("/?category=length&value=abc&from=metre&to=foot").get_data(as_text=True)
+    assert 'aria-live="polite">Please enter a number, like 12 or 3.5.</p>' in html
+
+
+def test_script_data_allows_minus_only_for_temperature():
+    from converter.views import units_for_script
+
+    data = units_for_script()
+    assert [key for key, c in data.items() if c["allowNegative"]] == ["temperature"]
+    assert data["weight"]["popular"][0] == {"from": "kilogram", "to": "pound", "label": "kg → lb"}
+
+
+def test_page_without_javascript(client):
+    # This is the HTML before any script runs: buttons that need JS start
+    # hidden, and the plain Convert button and links are there.
+    html = client.get("/?category=temperature&value=5&from=celsius&to=kelvin").get_data(as_text=True)
+    assert re.search(r'id="sign" hidden', html)
+    assert re.search(r'id="clear" hidden', html)
+    assert re.search(r'id="copy" hidden', html)
+    assert 'type="submit" class="btn btn-primary convert-btn">Convert</button>' in html
+    assert 'href="/?category=temperature&amp;value=5&amp;from=fahrenheit&amp;to=celsius"' in html  # a chip

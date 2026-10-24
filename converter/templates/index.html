@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_icons.html" import category_icon %}
 
 {% macro unit_options(category_key, selected) %}
   {% for key, unit in categories[category_key].units.items() %}
@@ -13,10 +14,10 @@
 </div>
 
 <section class="card">
-  <nav class="tabs" aria-label="Unit categories">
+  <nav class="tabs" id="tabs" aria-label="Unit categories">
     {% for key, cat in categories.items() %}
       <a class="tab" href="{{ category_urls[key] }}" data-category="{{ key }}"
-         {% if key == category %}aria-current="page"{% endif %}>{{ cat.label }}</a>
+         {% if key == category %}aria-current="page"{% endif %}>{{ category_icon(key) }}<span>{{ cat.label }}</span></a>
     {% endfor %}
   </nav>
   {% if errors.category %}<p class="error" id="category-error">{{ errors.category }}</p>{% endif %}
@@ -29,9 +30,19 @@
 
     <div class="field">
       <label for="value">Value</label>
-      <input id="value" name="value" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"
-             value="{{ params.value or '' }}" placeholder="Type a number" aria-describedby="value-error"
-             {% if errors.value %}aria-invalid="true"{% endif %}>
+      <div class="input-wrap">
+        <input id="value" name="value" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"
+               value="{{ params.value or '' }}" placeholder="Type a number" aria-describedby="value-error"
+               {% if errors.value %}aria-invalid="true"{% endif %}>
+        {# These two buttons need JavaScript, so app.js shows them. #}
+        <div class="input-buttons">
+          <button type="button" class="input-btn" id="sign" hidden
+                  aria-label="Switch between plus and minus" title="Plus / minus">±</button>
+          <button type="button" class="input-btn" id="clear" hidden aria-label="Clear the number" title="Clear (Esc)">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
       <p class="error" id="value-error">{{ errors.value }}</p>
     </div>
 
@@ -42,7 +53,7 @@
         <p class="error" id="from-error">{{ errors.from }}</p>
       </div>
       <a class="icon-btn swap" id="swap" href="{{ swap_url }}" aria-label="Swap units" title="Swap units">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <div class="field">
         <label for="to">To</label>
@@ -51,18 +62,31 @@
       </div>
     </div>
 
+    <div class="popular">
+      <span class="popular-label" id="popular-label">Popular</span>
+      <ul class="chips" id="chips" aria-labelledby="popular-label">
+        {% for pair in popular %}
+          <li><a class="chip" href="{{ pair.url }}" data-from="{{ pair.from }}" data-to="{{ pair.to }}"
+                 {% if pair.from == params.from and pair.to == params.to %}aria-current="true"{% endif %}>{{ pair.label }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
     <button type="submit" class="btn btn-primary convert-btn">Convert</button>
   </form>
 
-  <section class="result" aria-live="polite" aria-label="Result">
+  <section class="result" aria-label="Result">
     <div class="result-text">
       <p class="result-value">
         <span id="result-number">{{ result.formatted if result else "—" }}</span>
         <span class="result-symbol" id="result-symbol">{{ result.symbol if result }}</span>
       </p>
-      <p class="result-summary" id="result-summary">{{ result.summary if result else "Fix the input above to see the answer." }}</p>
+      {# Only this line is read out by screen readers when it changes. #}
+      <p class="result-summary" id="result-summary" aria-live="polite">{{ result.summary if result else first_error }}</p>
+      <p class="result-formula" id="result-formula">{{ result.formula if result }}</p>
     </div>
     <button type="button" class="btn btn-ghost copy-btn" id="copy" hidden {% if not result %}disabled{% endif %}>Copy</button>
+    <span class="visually-hidden" role="status" id="copy-status"></span>
   </section>
 
   <div class="all-toggle">

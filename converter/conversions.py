@@ -59,6 +59,41 @@ def convert_all(value, category, from_unit):
     ]
 
 
+TEMPERATURE_FORMULAS = {
+    ("celsius", "fahrenheit"): "°F = °C × 9/5 + 32",
+    ("fahrenheit", "celsius"): "°C = (°F − 32) × 5/9",
+    ("celsius", "kelvin"): "K = °C + 273.15",
+    ("kelvin", "celsius"): "°C = K − 273.15",
+    ("fahrenheit", "kelvin"): "K = (°F − 32) × 5/9 + 273.15",
+    ("kelvin", "fahrenheit"): "°F = (K − 273.15) × 9/5 + 32",
+}
+
+
+def describe_formula(category, from_unit, to_unit):
+    """Explain how the answer is made, in a few words.
+
+    >>> describe_formula("weight", "kilogram", "gram")
+    'Multiply by 1,000'
+    >>> describe_formula("weight", "gram", "kilogram")
+    'Divide by 1,000'
+    """
+    if from_unit == to_unit:
+        return "Same unit: the number doesn't change"
+    if category == "temperature":
+        return TEMPERATURE_FORMULAS[(from_unit, to_unit)]
+
+    units = CATEGORIES[category].units
+    ratio = units[from_unit].factor / units[to_unit].factor
+    multiply = format_number(ratio)
+    divide = format_number(1 / ratio)
+    # "Divide by 1,000" reads better than "Multiply by 0.001", and
+    # "Divide by 1.609344" better than "Multiply by 0.6213711922".
+    # But "Multiply by 0.3048" beats "Divide by 3.280839895".
+    if ratio < 1 and ("." not in divide or len(divide) < len(multiply)):
+        return f"Divide by {divide}"
+    return f"Multiply by {multiply}"
+
+
 SUPERSCRIPTS = str.maketrans("0123456789-", "⁰¹²³⁴⁵⁶⁷⁸⁹⁻")
 
 

@@ -1,7 +1,7 @@
 // Live conversion and the dark-mode toggle.
 // The page already works without this file (the server does the converting).
 // This script makes it faster: it asks /api/convert while the user types,
-// and handles the tabs, swap and "show all" links without reloading.
+// and handles the tabs, swap, popular and "show all" links without reloading.
 (function () {
   "use strict";
 
@@ -10,21 +10,28 @@
   const root = document.documentElement;
   const themeButton = document.getElementById("theme-toggle");
   const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  const pageColour = { light: "#f3f5fb", dark: "#0e1016" }; // same as --bg in style.css
 
   function currentTheme() {
     return root.dataset.theme || (systemDark.matches ? "dark" : "light");
   }
 
-  function updateThemeButton() {
+  function updateTheme() {
     const next = currentTheme() === "dark" ? "light" : "dark";
     themeButton.setAttribute("aria-label", "Switch to " + next + " mode");
     themeButton.title = "Switch to " + next + " mode";
+    // Phones colour their browser bar with this.
+    if (root.dataset.theme) {
+      document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
+        meta.content = pageColour[root.dataset.theme];
+      });
+    }
   }
 
   if (themeButton) {
     themeButton.hidden = false;
-    updateThemeButton();
-    systemDark.addEventListener("change", updateThemeButton);
+    updateTheme();
+    systemDark.addEventListener("change", updateTheme);
     themeButton.addEventListener("click", function () {
       const next = currentTheme() === "dark" ? "light" : "dark";
       root.dataset.theme = next;
@@ -33,7 +40,7 @@
       } catch (e) {
         // Storage can be blocked (private mode). The theme still changes for this visit.
       }
-      updateThemeButton();
+      updateTheme();
     });
   }
 
@@ -48,14 +55,20 @@
     category: document.getElementById("category"),
     all: document.getElementById("all"),
     value: document.getElementById("value"),
+    sign: document.getElementById("sign"),
+    clear: document.getElementById("clear"),
     from: document.getElementById("from"),
     to: document.getElementById("to"),
     swap: document.getElementById("swap"),
+    tabsNav: document.getElementById("tabs"),
     tabs: document.querySelectorAll(".tab"),
+    chips: document.getElementById("chips"),
     number: document.getElementById("result-number"),
     symbol: document.getElementById("result-symbol"),
     summary: document.getElementById("result-summary"),
+    formula: document.getElementById("result-formula"),
     copy: document.getElementById("copy"),
+    copyStatus: document.getElementById("copy-status"),
     toggleAll: document.getElementById("toggle-all"),
     allSection: document.getElementById("all-units"),
     allTitle: document.getElementById("all-units-title"),
@@ -70,7 +83,7 @@
     return !el.all.disabled;
   }
 
-  function currentQuery() {
+  function currentQuery(changes) {
     const query = new URLSearchParams({
       category: el.category.value,
       value: el.value.value,
@@ -78,6 +91,7 @@
       to: el.to.value,
     });
     if (showingAll()) query.set("all", "1");
+    Object.entries(changes || {}).forEach(function (pair) { query.set(pair[0], pair[1]); });
     return query.toString();
   }
 
@@ -92,6 +106,43 @@
     });
   }
 
+  // ---------- Popular chips ----------
+
+  function fillChips(category) {
+    el.chips.replaceChildren();
+    units[category].popular.forEach(function (pair) {
+      const link = document.createElement("a");
+      link.className = "chip";
+      link.href = "?" + currentQuery({ category: category, from: pair.from, to: pair.to });
+      link.dataset.from = pair.from;
+      link.dataset.to = pair.to;
+      link.textContent = pair.label;
+      const item = document.createElement("li");
+      item.append(link);
+      el.chips.append(item);
+    });
+    markActiveChip();
+  }
+
+  function markActiveChip() {
+    el.chips.querySelectorAll(".chip").forEach(function (chip) {
+      if (chip.dataset.from === el.from.value && chip.dataset.to === el.to.value) {
+        chip.setAttribute("aria-current", "true");
+      } else {
+        chip.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  // ---------- Value box buttons (± and ×) ----------
+
+  function updateValueButtons() {
+    el.sign.hidden = !units[el.category.value].allowNegative;
+    el.clear.hidden = el.value.value === "";
+  }
+
+  // ---------- Showing the answer ----------
+
   function setError(field, message) {
     const box = document.getElementById(field + "-error");
     if (box) box.textContent = message || "";
@@ -101,12 +152,23 @@
     }
   }
 
+  function clearAnswer(message) {
+    el.number.textContent = "—";
+    el.symbol.textContent = "";
+    el.summary.textContent = message;
+    el.formula.textContent = "";
+    el.copy.disabled = true;
+    el.allTitle.textContent = "Your value in every unit";
+    showTable([]);
+  }
+
   function showResult(data) {
     ["value", "from", "to"].forEach(function (field) { setError(field, ""); });
     if (el.categoryError) el.categoryError.remove();
     el.number.textContent = data.formatted;
     el.symbol.textContent = data.symbol;
     el.summary.textContent = data.summary;
+    el.formula.textContent = data.formula;
     el.copy.disabled = false;
     el.allTitle.textContent = data.input + " in every unit";
     showTable(data.all || []);
@@ -114,12 +176,14 @@
 
   function showErrors(errors) {
     ["value", "from", "to"].forEach(function (field) { setError(field, errors[field]); });
-    el.number.textContent = "—";
-    el.symbol.textContent = "";
-    el.summary.textContent = "Fix the input above to see the answer.";
-    el.copy.disabled = true;
-    el.allTitle.textContent = "Your value in every unit";
-    showTable([]);
+    // The summary is the live region, so screen readers hear the problem.
+    clearAnswer(errors.value || errors.from || errors.to || errors.category || "Please check the input.");
+  }
+
+  // Nothing typed yet (or only "-" or "."): a calm hint, not a red error.
+  function showWaiting() {
+    ["value", "from", "to"].forEach(function (field) { setError(field, ""); });
+    clearAnswer("Type a number to convert.");
   }
 
   function showTable(rows) {
@@ -145,11 +209,17 @@
 
   function convertNow() {
     clearTimeout(timer);
+    updateValueButtons();
+    markActiveChip();
     const query = currentQuery();
     // Keep the address bar in step, so the page can be bookmarked or shared.
     history.replaceState(null, "", "?" + query);
 
     const thisRequest = ++requestCount;
+    if (/^[+-]?\.?$/.test(el.value.value.trim())) {
+      showWaiting();
+      return;
+    }
     fetch(apiUrl + "?" + query, { headers: { Accept: "application/json" } })
       .then(function (response) {
         return response.json().then(function (body) {
@@ -169,8 +239,11 @@
 
   function convertSoon() {
     clearTimeout(timer);
+    updateValueButtons();
     timer = setTimeout(convertNow, 250); // wait until the user stops typing
   }
+
+  // ---------- Events ----------
 
   // Typing updates the answer. Enter converts right away.
   el.value.addEventListener("input", convertSoon);
@@ -189,8 +262,18 @@
       tab.setAttribute("aria-current", "page");
       el.category.value = category;
       fillUnits(category, units[category].defaultFrom, units[category].defaultTo);
+      fillChips(category);
       convertNow();
     });
+  });
+
+  el.chips.addEventListener("click", function (event) {
+    const chip = event.target.closest(".chip");
+    if (!chip) return;
+    event.preventDefault();
+    el.from.value = chip.dataset.from;
+    el.to.value = chip.dataset.to;
+    convertNow();
   });
 
   el.swap.addEventListener("click", function (event) {
@@ -199,6 +282,39 @@
     el.from.value = el.to.value;
     el.to.value = from;
     convertNow();
+  });
+
+  // ± puts a minus in front of the number, or takes it away.
+  // Phone number keypads often have no minus key.
+  el.sign.addEventListener("click", function () {
+    const text = el.value.value.trim();
+    if (text.startsWith("-")) el.value.value = text.slice(1);
+    else if (text.startsWith("+")) el.value.value = "-" + text.slice(1);
+    else el.value.value = "-" + text;
+    convertNow();
+  });
+
+  function clearValue() {
+    el.value.value = "";
+    convertNow();
+    el.value.focus();
+  }
+  el.clear.addEventListener("click", clearValue);
+
+  // Keyboard: "/" jumps to the number box, Esc clears it.
+  document.addEventListener("keydown", function (event) {
+    const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(event.target.tagName);
+    if (event.key === "/" && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      el.value.focus();
+      el.value.select();
+    }
+  });
+  el.value.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && el.value.value !== "") {
+      event.preventDefault();
+      clearValue();
+    }
   });
 
   el.toggleAll.addEventListener("click", function (event) {
@@ -217,7 +333,20 @@
     if (!navigator.clipboard) return;
     navigator.clipboard.writeText(text).then(function () {
       el.copy.textContent = "Copied!";
-      setTimeout(function () { el.copy.textContent = "Copy"; }, 1500);
+      el.copyStatus.textContent = "Copied " + text; // read out by screen readers
+      setTimeout(function () {
+        el.copy.textContent = "Copy";
+        el.copyStatus.textContent = "";
+      }, 1500);
     });
   });
+
+  // ---------- Start ----------
+
+  updateValueButtons();
+  // On phones the tabs scroll sideways: show the chosen one.
+  const activeTab = el.tabsNav.querySelector('[aria-current="page"]');
+  if (activeTab && el.tabsNav.scrollWidth > el.tabsNav.clientWidth) {
+    el.tabsNav.scrollLeft = activeTab.offsetLeft - (el.tabsNav.clientWidth - activeTab.offsetWidth) / 2;
+  }
 })();

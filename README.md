@@ -28,9 +28,12 @@ You don't need an account. There is no login.
 
 ![An error: -300 °C is colder than absolute zero](docs/screenshots/error.png)
 
-**On a phone**
+**On a phone** (light and dark)
 
-![The converter on a phone screen](docs/screenshots/phone.png)
+<p>
+  <img src="docs/screenshots/phone.png" alt="The converter on a phone screen" width="300">
+  <img src="docs/screenshots/phone-dark.png" alt="The converter on a phone screen, dark mode" width="300">
+</p>
 
 ## What can it do?
 
@@ -53,14 +56,22 @@ For example: kilograms to grams, grams to pounds, or km to miles.
 Other things it can do:
 
 - **Live answer.** The answer changes when you type. You don't need to press a button.
+- **Formula.** Under the answer you see *how* it is made. For example: "Multiply by 1,000" or "°F = °C × 9/5 + 32".
+- **Popular conversions.** Small buttons like "kg → lb". One tap sets both units.
 - **Swap button (⇄).** It changes "From" and "To" around.
+- **± button.** For temperature. It adds or takes away the minus. Phone keypads often have no minus key.
+- **Clear button (×).** It empties the number box.
 - **Show all units.** One button shows your number in every unit of the group. Press it again to hide the table.
 - **Copy button.** It copies the answer.
 - **Dark mode.** The moon button makes the page dark. The app remembers your choice.
+- **Keyboard keys.** Press `/` to jump to the number box. Press `Esc` to clear it.
 - **Share a link.** The web address has your numbers in it. You can save it or send it to a friend.
 - **Clear errors.** For example: "Length can't be negative."
-- **Phone friendly.** The page fits small screens.
+- **Phone friendly.** On a phone, the categories are one row. Swipe it left and right. The answer fits on the first screen.
+- **For everyone.** It works with a keyboard and with a screen reader. The colours have good contrast.
 - **Works without JavaScript.** Then you press the "Convert" button.
+
+You can read how we planned the design in [docs/UI_UX_PLAN.md](docs/UI_UX_PLAN.md).
 
 ## What we use
 
@@ -112,7 +123,7 @@ You need Python 3.13. These steps are for Windows.
 ```
 
 You see a dot for every test that passes. At the end you see "passed".
-There are more than 240 tests.
+There are more than 340 tests.
 
 ## Project folders
 
@@ -127,6 +138,7 @@ unit_converter/
     static/            the CSS and JavaScript files
   tests/               the tests
   docs/screenshots/    the pictures in this file
+  docs/UI_UX_PLAN.md   the design plan
   requirements.txt     the list of libraries
 ```
 
@@ -143,6 +155,12 @@ convert(1, "weight", "kilogram", "gram")   # always 1000.0
 
 All the maths is in `converter/conversions.py`. There is no website code in it.
 So it is very easy to test.
+
+The formula line is a pure function too:
+
+```python
+describe_formula("weight", "gram", "kilogram")   # always "Divide by 1,000"
+```
 
 ### 2. Input validation
 
@@ -172,5 +190,7 @@ The tests are in the `tests/` folder:
 
 - `test_conversions.py`: known answers (1 kg = 1,000 g, 100 °C = 212 °F, and more).
   It also changes every unit to every other unit and back again. We must get the same number.
+  It also checks the formula line, like "Divide by 1,000".
 - `test_validation.py`: good input and bad input, and the error messages.
+- `test_units.py`: the unit list has no mistakes. For example, every popular button uses real units.
 - `test_views.py`: the web page and the API give the right answers.
