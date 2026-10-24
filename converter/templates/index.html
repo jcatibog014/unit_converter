@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% macro unit_options(category_key, selected) %}
+  {% for key, unit in categories[category_key].units.items() %}
+    <option value="{{ key }}" {% if key == selected %}selected{% endif %}>{{ unit.label }} ({{ unit.symbol }})</option>
+  {% endfor %}
+{% endmacro %}
+
+{% block content %}
+<div class="intro">
+  <h1>Convert units in a second</h1>
+  <p>Pick a category, type a number, and choose your units.</p>
+</div>
+
+<section class="card">
+  <nav class="tabs" aria-label="Unit categories">
+    {% for key, cat in categories.items() %}
+      <a class="tab" href="{{ category_urls[key] }}" data-category="{{ key }}"
+         {% if key == category %}aria-current="page"{% endif %}>{{ cat.label }}</a>
+    {% endfor %}
+  </nav>
+  {% if errors.category %}<p class="error" id="category-error">{{ errors.category }}</p>{% endif %}
+
+  <form id="converter-form" class="converter" method="get" action="{{ url_for('converter.index') }}"
+        data-api="{{ url_for('converter.api_convert') }}" novalidate>
+    <input type="hidden" name="category" id="category" value="{{ category }}">
+    {# A disabled field isn't sent, so "all=1" is only in the URL while the table is on. #}
+    <input type="hidden" name="all" id="all" value="1" {% if not show_all %}disabled{% endif %}>
+
+    <div class="field">
+      <label for="value">Value</label>
+      <input id="value" name="value" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"
+             value="{{ params.value or '' }}" placeholder="Type a number" aria-describedby="value-error"
+             {% if errors.value %}aria-invalid="true"{% endif %}>
+      <p class="error" id="value-error">{{ errors.value }}</p>
+    </div>
+
+    <div class="unit-row">
+      <div class="field">
+        <label for="from">From</label>
+        <select id="from" name="from" aria-describedby="from-error">{{ unit_options(category, params.from) }}</select>
+        <p class="error" id="from-error">{{ errors.from }}</p>
+      </div>
+      <a class="icon-btn swap" id="swap" href="{{ swap_url }}" aria-label="Swap units" title="Swap units">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <div class="field">
+        <label for="to">To</label>
+        <select id="to" name="to" aria-describedby="to-error">{{ unit_options(category, params.to) }}</select>
+        <p class="error" id="to-error">{{ errors.to }}</p>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary convert-btn">Convert</button>
+  </form>
+
+  <section class="result" aria-live="polite" aria-label="Result">
+    <div class="result-text">
+      <p class="result-value">
+        <span id="result-number">{{ result.formatted if result else "—" }}</span>
+        <span class="result-symbol" id="result-symbol">{{ result.symbol if result }}</span>
+      </p>
+      <p class="result-summary" id="result-summary">{{ result.summary if result else "Fix the input above to see the answer." }}</p>
+    </div>
+    <button type="button" class="btn btn-ghost copy-btn" id="copy" hidden {% if not result %}disabled{% endif %}>Copy</button>
+  </section>
+
+  <div class="all-toggle">
+    <a class="btn btn-secondary" id="toggle-all" href="{{ toggle_all_url }}"
+       aria-controls="all-units" aria-expanded="{{ 'true' if show_all else 'false' }}">
+      {{ "Hide all units" if show_all else "Show all units" }}
+    </a>
+  </div>
+
+  <section class="all-units" id="all-units" {% if not show_all %}hidden{% endif %}>
+    <h2 id="all-units-title">{{ result.input if result else "Your value" }} in every unit</h2>
+    <table aria-labelledby="all-units-title">
+      <thead><tr><th scope="col">Unit</th><th scope="col" class="num">Value</th></tr></thead>
+      <tbody id="all-units-body">
+        {% if result and result.all %}
+          {% for row in result.all %}
+            <tr {% if row.unit == params.from %}class="is-from"{% elif row.unit == params.to %}class="is-to"{% endif %}>
+              <td>{{ row.label }}</td>
+              <td class="num">{{ row.formatted }} <span class="sym">{{ row.symbol }}</span></td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </section>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script type="application/json" id="units-data">{{ units_data|tojson }}</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}
