@@ -1,9 +1,15 @@
-"""Unit Converter.
+"""Swap Meter, a unit converter.
 
 Flask builds the app inside create_app() (the "app factory" pattern).
 Tests call it with their own settings, so each test gets a fresh app.
 """
+import mimetypes
+
 from flask import Flask, render_template
+
+# Python doesn't know this file type, and browsers want the right one for
+# the app manifest (the name and icons used by "Add to Home Screen").
+mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 
 def create_app(test_config=None):

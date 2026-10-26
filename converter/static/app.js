@@ -10,7 +10,7 @@
   const root = document.documentElement;
   const themeButton = document.getElementById("theme-toggle");
   const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
-  const pageColour = { light: "#f3f5fb", dark: "#0e1016" }; // same as --bg in style.css
+  const pageColour = { light: "#f4f7f6", dark: "#091515" }; // same as --bg in style.css
 
   function currentTheme() {
     return root.dataset.theme || (systemDark.matches ? "dark" : "light");
