@@ -1,42 +1,53 @@
-/* Unit Converter styles.
-   Colours live in variables on :root. The dark theme swaps the variables:
+/* Swap Meter styles.
+   The colours come from the logo: deep teal (#0f3d3e) and orange (#c76e00).
+   They live in variables on :root. The dark theme swaps the variables:
    it follows the system setting, unless the visitor picked a theme with the
    toggle (saved as data-theme on <html>). */
 
 :root {
-  --bg: #f3f5fb;
-  --bg-glow: #e3e6ff;
+  --bg: #f4f7f6;
+  --bg-glow: #d7ebe7;
+  --bg-glow-2: #f8e7d2;
   --surface: #ffffff;
-  --surface-2: #f6f7fb;
-  --text: #171a26;
-  --muted: #5d6478;
-  --border: #dfe3ee;
-  --control-border: #878ea2; /* 3:1 on the card, so you can see where a box ends */
-  --accent: #4f46e5;
+  --surface-2: #f1f5f4;
+  --text: #0f2a2b;
+  --muted: #4b6364;
+  --border: #d8e2e0;
+  --control-border: #75898a; /* 3:1 on the card, so you can see where a box ends */
+  --accent: #0f3d3e;          /* logo teal: buttons, active tab, links */
   --accent-text: #ffffff;
-  --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--surface));
-  --error: #c62828;
-  --shadow: 0 1px 2px rgb(20 24 40 / 6%), 0 12px 32px rgb(20 24 40 / 8%);
-  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%235d6478' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --accent-soft: #e5f1ee;       /* pale logo teal: result card, active chip */
+  --highlight: #9a5200;       /* logo orange, darkened so text stays readable */
+  --logo-teal: #0f3d3e;
+  --logo-orange: #c76e00;
+  --focus: var(--logo-orange);
+  --error: #b3261e;
+  --shadow: 0 1px 2px rgb(15 61 62 / 6%), 0 12px 32px rgb(15 61 62 / 9%);
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%234b6364' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --radius: 14px;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e1016;
-    --bg-glow: #1c1d3a;
-    --surface: #171a23;
-    --surface-2: #1e212c;
-    --text: #e9ebf3;
-    --muted: #9ca3b7;
-    --border: #2b3040;
-    --control-border: #686f85;
-    --accent: #8b8cf9;
-    --accent-text: #0e1016;
+    --bg: #091515;
+    --bg-glow: #11302e;
+    --bg-glow-2: #2a1d0c;
+    --surface: #0f2021;
+    --surface-2: #142a2b;
+    --text: #e3eeec;
+    --muted: #9db4b1;
+    --border: #1f3a3a;
+    --control-border: #58777a;
+    --accent: #6ec2b9;
+    --accent-text: #071312;
+    --accent-soft: #143331;
+    --highlight: #f0a04b;
+    --logo-teal: #7cc7bf;
+    --logo-orange: #f0a04b;
     --error: #ff8a80;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 35%);
-    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%239ca3b7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%239db4b1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     color-scheme: dark;
   }
   :root:not([data-theme="light"]) .icon-moon { display: none; }
@@ -44,19 +55,24 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #0e1016;
-  --bg-glow: #1c1d3a;
-  --surface: #171a23;
-  --surface-2: #1e212c;
-  --text: #e9ebf3;
-  --muted: #9ca3b7;
-  --border: #2b3040;
-  --control-border: #686f85;
-  --accent: #8b8cf9;
-  --accent-text: #0e1016;
+  --bg: #091515;
+  --bg-glow: #11302e;
+  --bg-glow-2: #2a1d0c;
+  --surface: #0f2021;
+  --surface-2: #142a2b;
+  --text: #e3eeec;
+  --muted: #9db4b1;
+  --border: #1f3a3a;
+  --control-border: #58777a;
+  --accent: #6ec2b9;
+  --accent-text: #071312;
+  --accent-soft: #143331;
+  --highlight: #f0a04b;
+  --logo-teal: #7cc7bf;
+  --logo-orange: #f0a04b;
   --error: #ff8a80;
   --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 35%);
-  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%239ca3b7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%239db4b1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   color-scheme: dark;
 }
 :root[data-theme="dark"] .icon-moon { display: none; }
@@ -77,6 +93,7 @@ body {
   color: var(--text);
   background:
     radial-gradient(60rem 28rem at 50% -8rem, var(--bg-glow), transparent 70%),
+    radial-gradient(28rem 20rem at 100% 0, var(--bg-glow-2), transparent 70%),
     var(--bg);
 }
 
@@ -94,21 +111,18 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-weight: 700;
-  font-size: 1.05rem;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
   color: var(--text);
   text-decoration: none;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: var(--accent);
-  color: var(--accent-text);
-}
+/* The logo is inline SVG, so its teal can turn lighter in dark mode. */
+.brand-logo { display: block; width: 44px; height: 44px; flex: none; }
+.logo-teal { stroke: var(--logo-teal); }
+.logo-orange { stroke: var(--logo-orange); }
+.brand-name span { color: var(--highlight); }
 
 .container {
   flex: 1;
@@ -238,8 +252,8 @@ select {
 
 input:focus, select:focus { outline: none; }
 input:focus-visible, select:focus-visible {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: var(--focus);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 25%, transparent);
 }
 
 input[aria-invalid="true"] { border-color: var(--error); }
@@ -382,7 +396,7 @@ input[aria-invalid="true"] { border-color: var(--error); }
 .icon-sun { display: none; }
 
 a:focus-visible, button:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -412,7 +426,7 @@ a:focus-visible, button:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.result-symbol { color: var(--accent); }
+.result-symbol { color: var(--highlight); }
 
 .result-summary {
   margin: 6px 0 0;
@@ -424,7 +438,7 @@ a:focus-visible, button:focus-visible {
   margin: 8px 0 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--highlight);
 }
 .result-formula:empty { display: none; }
 
@@ -462,14 +476,14 @@ tbody tr:last-child td { border-bottom: none; }
 .num { text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .sym { color: var(--muted); }
 tr.is-from td { background: var(--surface-2); font-weight: 600; }
-tr.is-to td { background: var(--accent-soft); font-weight: 600; color: var(--accent); }
+tr.is-to td { background: var(--accent-soft); font-weight: 600; color: var(--highlight); }
 tr.is-to .sym { color: inherit; }
 
 /* ---------- Error page ---------- */
 
 .error-card { text-align: center; padding: 48px 24px; }
 .error-card h1 { margin: 0 0 24px; font-size: 1.4rem; }
-.error-code { margin: 0; font-size: 3rem; font-weight: 800; color: var(--accent); }
+.error-code { margin: 0; font-size: 3rem; font-weight: 800; color: var(--highlight); }
 
 /* ---------- Phones ---------- */
 

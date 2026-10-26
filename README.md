@@ -1,8 +1,12 @@
-# Unit Converter
+<p align="center">
+  <img src="docs/brand/swap-meter-logo.png" alt="Swap Meter logo: a meter with two arrows" width="160">
+</p>
+
+# Swap Meter
 
 ## What is this?
 
-This is a small website. It changes a number from one unit to another unit.
+**Swap Meter** is a small website. It is a unit converter: it changes a number from one unit to another unit.
 For example: 1 kilogram is 1,000 grams. 100 °C is 212 °F.
 
 It is a learning project. I practise three things here:
@@ -73,6 +77,21 @@ Other things it can do:
 
 You can read how we planned the design in [docs/UI_UX_PLAN.md](docs/UI_UX_PLAN.md).
 
+## Logo and colours
+
+The logo is a **meter** (like a speed meter) with **two arrows**. The arrows mean "swap": one unit changes into another.
+That is where the name comes from: **Swap Meter**.
+
+The app uses the two colours of the logo:
+
+| Colour | Code | Where? |
+|---|---|---|
+| Deep teal | `#0f3d3e` | Buttons, the chosen category, the text colour |
+| Orange | `#c76e00` | The answer's unit, the formula, the focus ring |
+
+In dark mode, the teal is lighter (`#6ec2b9`), so you can see it on the dark page.
+The logo is also the **app icon**: you see it in the browser tab and on the phone home screen ("Add to Home Screen").
+
 ## What we use
 
 | Name | What is it? | Why do we use it? |
@@ -136,9 +155,12 @@ unit_converter/
     views.py           the web pages
     templates/         the HTML pages
     static/            the CSS and JavaScript files
+      icons/           the logo and app icons
+      site.webmanifest the app name and icons for phones
   tests/               the tests
   docs/screenshots/    the pictures in this file
   docs/UI_UX_PLAN.md   the design plan
+  docs/brand/          the original logo picture
   requirements.txt     the list of libraries
 ```
 

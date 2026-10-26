@@ -4,7 +4,7 @@ This file guides AI coding agents (Claude Code, Codex, Cursor, Copilot and other
 
 ## Overview
 
-A unit converter web app in Python (Flask, no database, no login). It is a learning project for pure functions, input validation and test cases. Keep the code readable for a learner: short comments that explain *why*, and no extra libraries unless the owner asks for them. The README is written in simple (A1-level) English on purpose; keep it that way.
+**Swap Meter**, a unit converter web app in Python (Flask, no database, no login). The Python package is still called `converter`. It is a learning project for pure functions, input validation and test cases. Keep the code readable for a learner: short comments that explain *why*, and no extra libraries unless the owner asks for them. The README is written in simple (A1-level) English on purpose; keep it that way.
 
 Python 3.13 is at `%LOCALAPPDATA%\Programs\Python\Python313\python.exe`. Use the virtual environment:
 
@@ -34,6 +34,7 @@ Python 3.13 is at `%LOCALAPPDATA%\Programs\Python\Python313\python.exe`. Use the
 ## Conventions
 
 - Styling: `converter/static/style.css`, with colours as CSS variables on `:root`. Dark mode redefines them under `prefers-color-scheme: dark` (unless `data-theme="light"`) and under `[data-theme="dark"]`; change both blocks together. The phone breakpoint is 520px; there the tabs and chips become one swipeable row.
+- Brand: the palette comes from the logo, deep teal `#0f3d3e` (`--accent`, `--logo-teal`) and orange `#c76e00` (`--logo-orange`, focus ring). Orange *text* uses the darker `--highlight` (`#9a5200` light, `#f0a04b` dark) to keep 4.5:1. The logo drawing lives twice, in `templates/_logo.html` (inline, themed through `.logo-teal`/`.logo-orange`) and `static/icons/logo.svg` (favicon, own dark-mode style); keep them in sync. The PNG icons in `static/icons/` and `site.webmanifest` are rendered from `logo.svg`; `docs/brand/swap-meter-logo.png` is the owner's original.
 - Accessibility rules (see `docs/UI_UX_PLAN.md`): text colours ≥ 4.5:1 and `--control-border` ≥ 3:1 against the card in both themes; touch targets ≥ 44px on phones; every icon-only button has an `aria-label`.
 - Keep comments teaching-oriented but brief. Add or update a test with every behaviour change.
 - README screenshots live in `docs/screenshots/`. Retake them when the UI changes visibly.

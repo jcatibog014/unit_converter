@@ -8,7 +8,8 @@ def test_home_page_shows_a_default_conversion(client):
     response = client.get("/")
     assert response.status_code == 200
     html = response.get_data(as_text=True)
-    assert "Unit Converter" in html
+    assert "<title>Swap Meter" in html
+    assert 'class="brand-name">Swap <span>Meter</span>' in html
     assert "1 m = 3.280839895 ft" in html
 
 
@@ -143,3 +144,26 @@ def test_page_without_javascript(client):
     assert re.search(r'id="copy" hidden', html)
     assert 'type="submit" class="btn btn-primary convert-btn">Convert</button>' in html
     assert 'href="/?category=temperature&amp;value=5&amp;from=fahrenheit&amp;to=celsius"' in html  # a chip
+
+
+def test_logo_and_app_icons_are_linked(client):
+    html = client.get("/").get_data(as_text=True)
+    assert '<svg class="brand-logo"' in html  # the logo in the header
+    assert 'href="/static/icons/logo.svg" type="image/svg+xml"' in html
+    assert 'rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png"' in html
+    assert 'rel="manifest" href="/static/site.webmanifest"' in html
+
+
+def test_manifest_names_the_app_and_its_icons_exist(client):
+    response = client.get("/static/site.webmanifest")
+    assert response.status_code == 200
+    assert response.mimetype == "application/manifest+json"
+    manifest = response.get_json(force=True)
+    assert manifest["name"] == "Swap Meter"
+    for icon in manifest["icons"]:
+        assert client.get("/static/" + icon["src"]).status_code == 200
+
+
+@pytest.mark.parametrize("path", ["icons/icon-32.png", "icons/apple-touch-icon.png", "icons/logo.svg"])
+def test_icon_files_are_served(client, path):
+    assert client.get("/static/" + path).status_code == 200

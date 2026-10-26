@@ -1,14 +1,19 @@
+{% from "_logo.html" import logo %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Unit Converter{% endblock %}</title>
-  <meta name="description" content="Convert length, weight, temperature, area, volume, speed, time and digital storage units.">
+  <title>{% block title %}Swap Meter · Unit Converter{% endblock %}</title>
+  <meta name="description" content="Swap Meter converts length, weight, temperature, area, volume, speed, time and digital storage units.">
   {# The colour of the browser bar on phones. app.js updates it when the theme button is used. #}
-  <meta name="theme-color" content="#f3f5fb" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0e1016" media="(prefers-color-scheme: dark)">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M9 12h14l-4-4M23 20H9l4 4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#f4f7f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#091515" media="(prefers-color-scheme: dark)">
+  {# App icons: the SVG for modern browsers, PNGs for older ones and for phone home screens. #}
+  <link rel="icon" href="{{ url_for('static', filename='icons/logo.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ url_for('static', filename='icons/icon-32.png') }}" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
   <script>
     // Runs before the page is drawn, so a saved dark theme doesn't flash light first.
     document.documentElement.classList.add("js");
@@ -24,10 +29,8 @@
 <body>
   <header class="site-header">
     <a class="brand" href="{{ url_for('converter.index') }}">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M5 9h14l-4-4M19 15H5l4 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-      Unit Converter
+      {{ logo() }}
+      <span class="brand-name">Swap <span>Meter</span></span>
     </a>
     <button type="button" class="icon-btn theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" hidden>
       <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
@@ -40,7 +43,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>Made with Python and Flask. Works in any modern browser.</p>
+    <p>Swap Meter · Made with Python and Flask. Works in any modern browser.</p>
     <p class="kbd-hint">Tip: press <kbd>/</kbd> to type a number and <kbd>Esc</kbd> to clear it.</p>
   </footer>
   {% block scripts %}{% endblock %}

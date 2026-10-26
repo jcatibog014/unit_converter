@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="165 169 470 470">
+  <!-- Swap Meter logo. Also the browser-tab icon: in a dark browser the teal turns lighter. -->
+  <style>
+    .teal { stroke: #0f3d3e; }
+    .orange { stroke: #c76e00; }
+    @media (prefers-color-scheme: dark) {
+      .teal { stroke: #7cc7bf; }
+      .orange { stroke: #f0a04b; }
+    }
+  </style>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g class="teal">
+      <path d="M200 402A200 200 0 0 1 600 402" stroke-width="36"/>
+      <path d="M400 248v31M289 294l22 22M511 294l-22 22M244 405h31M525 405h31" stroke-width="20"/>
+      <path d="M529 573H271M307 544l-36 29 36 29" stroke-width="32"/>
+    </g>
+    <g class="orange">
+      <circle cx="400" cy="404" r="27" stroke-width="26"/>
+      <path d="M414 378 462 286" stroke-width="30"/>
+      <path d="M271 492h258M493 463l36 29-36 29" stroke-width="32"/>
+    </g>
+  </g>
+</svg>
