@@ -9,7 +9,7 @@ answer. With JavaScript, app.js asks /api/convert while the user types.
 """
 from flask import Blueprint, jsonify, render_template, request, url_for
 
-from .conversions import convert, convert_all, format_number
+from .conversions import convert, convert_all, describe_formula, format_number
 from .units import CATEGORIES, DEFAULT_CATEGORY
 from .validation import fill_defaults, validate_conversion
 
@@ -31,6 +31,7 @@ def build_result(data, show_all):
         "symbol": to_unit.symbol,
         "input": given,  # e.g. "1 kg"
         "summary": f"{given} = {formatted} {to_unit.symbol}",  # e.g. "1 kg = 1,000 g"
+        "formula": describe_formula(data["category"], data["from_unit"], data["to_unit"]),
     }
     if show_all:
         payload["all"] = [
@@ -46,6 +47,15 @@ def build_result(data, show_all):
     return payload
 
 
+def popular_pairs(category_key):
+    """The quick-pick pairs of a category, with labels like "kg → lb"."""
+    category = CATEGORIES[category_key]
+    return [
+        {"from": f, "to": t, "label": f"{category.units[f].symbol} → {category.units[t].symbol}"}
+        for f, t in category.popular
+    ]
+
+
 def units_for_script():
     """The unit menus as plain data, so app.js can rebuild them."""
     return {
@@ -53,7 +63,9 @@ def units_for_script():
             "label": category.label,
             "defaultFrom": category.default_from,
             "defaultTo": category.default_to,
+            "allowNegative": category.allow_negative,  # shows the ± button
             "units": [[unit_key, unit.label, unit.symbol] for unit_key, unit in category.units.items()],
+            "popular": popular_pairs(key),
         }
         for key, category in CATEGORIES.items()
     }
@@ -87,6 +99,12 @@ def index():
         category_urls={key: page_url(category=key, **{"from": None, "to": None}) for key in CATEGORIES},
         swap_url=page_url(**{"from": params["to"], "to": params["from"]}),
         toggle_all_url=page_url(all=None if show_all else "1"),
+        popular=[
+            dict(pair, url=page_url(**{"from": pair["from"], "to": pair["to"]}))
+            for pair in popular_pairs(category)
+        ],
+        # Said by screen readers in place of the answer when the input is wrong.
+        first_error=next(iter(errors.values()), None),
         units_data=units_for_script(),
     ), (400 if errors else 200)
 

@@ -11,6 +11,7 @@
   --text: #171a26;
   --muted: #5d6478;
   --border: #dfe3ee;
+  --control-border: #878ea2; /* 3:1 on the card, so you can see where a box ends */
   --accent: #4f46e5;
   --accent-text: #ffffff;
   --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--surface));
@@ -30,6 +31,7 @@
     --text: #e9ebf3;
     --muted: #9ca3b7;
     --border: #2b3040;
+    --control-border: #686f85;
     --accent: #8b8cf9;
     --accent-text: #0e1016;
     --error: #ff8a80;
@@ -49,6 +51,7 @@
   --text: #e9ebf3;
   --muted: #9ca3b7;
   --border: #2b3040;
+  --control-border: #686f85;
   --accent: #8b8cf9;
   --accent-text: #0e1016;
   --error: #ff8a80;
@@ -125,6 +128,26 @@ body {
   font-size: 0.875rem;
   color: var(--muted);
 }
+.site-footer p { margin: 0 0 6px; }
+
+/* The keyboard tip only makes sense with JavaScript (and a keyboard). */
+.kbd-hint { display: none; }
+.js .kbd-hint { display: block; }
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 5px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+}
 
 .card {
   background: var(--surface);
@@ -138,6 +161,7 @@ body {
 
 /* An even grid: 4 tabs per row (2 on phones), so no tab sits alone on a row. */
 .tabs {
+  position: relative; /* app.js measures tab positions from here */
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
@@ -145,8 +169,12 @@ body {
 }
 
 .tab {
-  padding: 8px 10px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px; /* big enough for a finger */
+  padding: 6px 12px;
   white-space: nowrap;
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -185,7 +213,7 @@ input, select {
   font-size: 1.05rem;
   color: var(--text);
   background: var(--surface-2);
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--control-border);
   border-radius: var(--radius);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -215,6 +243,74 @@ input:focus-visible, select:focus-visible {
 }
 
 input[aria-invalid="true"] { border-color: var(--error); }
+
+/* The value box holds the ± and × buttons on its right side. */
+.input-wrap { position: relative; }
+.input-wrap:has(.input-btn:not([hidden])) input { padding-right: 60px; }
+.input-wrap:has(#sign:not([hidden])):has(#clear:not([hidden])) input { padding-right: 106px; }
+
+.input-buttons {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 2px;
+}
+
+.input-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.input-btn:hover { color: var(--text); background: var(--surface); }
+.input-btn[hidden] { display: none; }
+
+/* ---------- Popular conversions ---------- */
+
+.popular {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 16px;
+}
+
+.popular-label { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--control-border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip[aria-current="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+/* Touch screens: every chip is big enough for a finger. */
+@media (pointer: coarse) {
+  .chip { min-height: 44px; }
+}
 
 .error {
   margin: 0;
@@ -264,7 +360,7 @@ input[aria-invalid="true"] { border-color: var(--error); }
 .btn-secondary { background: transparent; color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .btn-secondary:hover { background: var(--accent-soft); }
 
-.btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn-ghost { background: var(--surface); color: var(--text); border-color: var(--control-border); }
 .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 
 .icon-btn {
@@ -274,7 +370,7 @@ input[aria-invalid="true"] { border-color: var(--error); }
   height: 44px;
   flex: none;
   border-radius: 50%;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--control-border);
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
@@ -324,6 +420,27 @@ a:focus-visible, button:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.result-formula {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.result-formula:empty { display: none; }
+
+/* Hidden on screen, but screen readers still read it. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------- Convert to all units ---------- */
 
 .all-toggle { margin-top: 18px; text-align: center; }
@@ -357,9 +474,34 @@ tr.is-to .sym { color: inherit; }
 /* ---------- Phones ---------- */
 
 @media (max-width: 520px) {
+  .container { padding-top: 16px; }
+  .intro { margin-bottom: 16px; }
+  .intro h1 { font-size: 1.4rem; margin-bottom: 2px; }
+  .intro p { font-size: 0.9rem; }
   .card { padding: 18px; border-radius: 18px; }
-  .tabs { grid-template-columns: repeat(2, 1fr); }
-  .unit-row { grid-template-columns: 1fr; gap: 10px; }
+
+  /* Tabs and chips become one row you can swipe sideways, so the answer
+     fits on the first screen. The faded right edge says "there is more". */
+  .tabs, .chips {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    margin-inline: -18px;
+    padding: 2px 18px;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 32px), transparent);
+  }
+  .tabs::-webkit-scrollbar, .chips::-webkit-scrollbar { display: none; }
+  .tabs { margin-bottom: 18px; }
+  .tab, .chips li { flex: none; scroll-snap-align: start; }
+  .chip { min-height: 44px; }
+  .popular { display: block; }
+  .popular-label { display: block; margin-bottom: 6px; }
+  .kbd-hint, .js .kbd-hint { display: none; }
+
+  .unit-row { grid-template-columns: 1fr; gap: 6px; }
   .swap { margin: 0 auto; transform: rotate(90deg); }
   .swap:hover { transform: rotate(270deg); }
   .result { flex-direction: column; align-items: stretch; }

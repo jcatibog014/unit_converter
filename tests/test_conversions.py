@@ -6,7 +6,7 @@ errors computers make (1e-12 relative by default here).
 """
 import pytest
 
-from converter.conversions import convert, convert_all, format_number
+from converter.conversions import convert, convert_all, describe_formula, format_number
 from converter.units import CATEGORIES
 
 
@@ -131,3 +131,39 @@ def test_unknown_unit_raises():
 )
 def test_format_number(number, text):
     assert format_number(number) == text
+
+
+@pytest.mark.parametrize(
+    "category, from_unit, to_unit, text",
+    [
+        # Multiply when the factor is 1 or more.
+        ("weight", "kilogram", "gram", "Multiply by 1,000"),
+        ("length", "mile", "kilometre", "Multiply by 1.609344"),
+        ("time", "hour", "minute", "Multiply by 60"),
+        ("weight", "kilogram", "pound", "Multiply by 2.204622622"),
+        # Divide when that reads better...
+        ("weight", "gram", "kilogram", "Divide by 1,000"),
+        ("length", "millimetre", "kilometre", "Divide by 1,000,000"),
+        ("length", "kilometre", "mile", "Divide by 1.609344"),
+        ("length", "centimetre", "inch", "Divide by 2.54"),
+        ("data", "bit", "byte", "Divide by 8"),
+        # ...but not when the multiply number is shorter.
+        ("length", "foot", "metre", "Multiply by 0.3048"),
+        ("weight", "pound", "kilogram", "Multiply by 0.45359237"),
+        # Temperature has real formulas.
+        ("temperature", "celsius", "fahrenheit", "°F = °C × 9/5 + 32"),
+        ("temperature", "fahrenheit", "celsius", "°C = (°F − 32) × 5/9"),
+        ("temperature", "kelvin", "celsius", "°C = K − 273.15"),
+        # Same unit.
+        ("length", "metre", "metre", "Same unit: the number doesn't change"),
+        ("temperature", "kelvin", "kelvin", "Same unit: the number doesn't change"),
+    ],
+)
+def test_describe_formula(category, from_unit, to_unit, text):
+    assert describe_formula(category, from_unit, to_unit) == text
+
+
+@pytest.mark.parametrize("category, unit", ALL_UNITS)
+def test_every_pair_has_a_formula(category, unit):
+    for other in CATEGORIES[category].units:
+        assert describe_formula(category, unit, other)
